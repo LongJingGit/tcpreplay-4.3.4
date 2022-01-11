@@ -4,9 +4,9 @@
  *   Copyright (c) 2001-2010 Aaron Turner <aturner at synfin dot net>
  *   Copyright (c) 2013-2018 Fred Klassen <tcpreplay at appneta dot com> - AppNeta
  *
- *   The Tcpreplay Suite of tools is free software: you can redistribute it 
- *   and/or modify it under the terms of the GNU General Public License as 
- *   published by the Free Software Foundation, either version 3 of the 
+ *   The Tcpreplay Suite of tools is free software: you can redistribute it
+ *   and/or modify it under the terms of the GNU General Public License as
+ *   published by the Free Software Foundation, either version 3 of the
  *   License, or with the authors permission any later version.
  *
  *   The Tcpreplay Suite is distributed in the hope that it will be useful,
@@ -42,32 +42,30 @@
 #include "tcpreplay_opts.h"
 #endif
 
-
-
 /**
  * \brief Returns a string describing the last error.
  *
- * Value when the last call does not result in an error is undefined 
+ * Value when the last call does not result in an error is undefined
  * (may be NULL, may be garbage)
  */
 char *
 tcpreplay_geterr(tcpreplay_t *ctx)
 {
     assert(ctx);
-    return(ctx->errstr);
+    return (ctx->errstr);
 }
 
 /**
- * \brief Returns a string describing the last warning.  
+ * \brief Returns a string describing the last warning.
  *
- * Value when the last call does not result in an warning is undefined 
+ * Value when the last call does not result in an warning is undefined
  * (may be NULL, may be garbage)
  */
 char *
 tcpreplay_getwarn(tcpreplay_t *ctx)
 {
     assert(ctx);
-    return(ctx->warnstr);
+    return (ctx->warnstr);
 }
 
 /**
@@ -76,8 +74,7 @@ tcpreplay_getwarn(tcpreplay_t *ctx)
  * Allocates memory and stuff like that.  Always returns a buffer or completely
  * fails by calling exit() on malloc failure.
  */
-tcpreplay_t *
-tcpreplay_init()
+tcpreplay_t *tcpreplay_init()
 {
     tcpreplay_t *ctx;
 
@@ -140,8 +137,7 @@ tcpreplay_init()
  * optionProcess() and it will parse all the options for you.  As always,
  * returns 0 on success, and -1 on error & -2 on warning.
  */
-int
-tcpreplay_post_args(tcpreplay_t *ctx, int argc)
+int tcpreplay_post_args(tcpreplay_t *ctx, int argc)
 {
     char *temp, *intname;
     char *ebuf;
@@ -158,8 +154,9 @@ tcpreplay_post_args(tcpreplay_t *ctx, int argc)
     if (HAVE_OPT(DBUG))
         debug = OPT_VALUE_DBUG;
 #else
-    if (HAVE_OPT(DBUG)) {
-        warn ++;
+    if (HAVE_OPT(DBUG))
+    {
+        warn++;
         tcpreplay_setwarn(ctx, "%s", "not configured with --enable-debug.  Debugging disabled.");
     }
 #endif
@@ -173,12 +170,16 @@ tcpreplay_post_args(tcpreplay_t *ctx, int argc)
     if (HAVE_OPT(DURATION))
         options->limit_time = OPT_VALUE_DURATION;
 
-    if (HAVE_OPT(TOPSPEED)) {
+    if (HAVE_OPT(TOPSPEED))
+    {
         options->speed.mode = speed_topspeed;
         options->speed.speed = 0;
-    } else if (HAVE_OPT(PPS)) {
+    }
+    else if (HAVE_OPT(PPS))
+    {
         n = atof(OPT_ARG(PPS));
-        if (!n) {
+        if (!n)
+        {
             tcpreplay_seterr(ctx, "invalid pps value '%s'", OPT_ARG(PPS));
             ret = -1;
             goto out;
@@ -186,24 +187,34 @@ tcpreplay_post_args(tcpreplay_t *ctx, int argc)
         options->speed.speed = (COUNTER)(n * 60.0 * 60.0); /* convert to packets per hour */
         options->speed.mode = speed_packetrate;
         options->speed.pps_multi = OPT_VALUE_PPS_MULTI;
-    } else if (HAVE_OPT(ONEATATIME)) {
+    }
+    else if (HAVE_OPT(ONEATATIME))
+    {
         options->speed.mode = speed_oneatatime;
         options->speed.speed = 0;
-    } else if (HAVE_OPT(MBPS)) {
+    }
+    else if (HAVE_OPT(MBPS))
+    {
         n = atof(OPT_ARG(MBPS));
-        if (n) {
+        if (n)
+        {
             options->speed.mode = speed_mbpsrate;
             options->speed.speed = (COUNTER)(n * 1000000.0); /* convert to bps */
-        } else {
+        }
+        else
+        {
             options->speed.mode = speed_topspeed;
             options->speed.speed = 0;
         }
-    } else if (HAVE_OPT(MULTIPLIER)) {
+    }
+    else if (HAVE_OPT(MULTIPLIER))
+    {
         options->speed.mode = speed_multiplier;
         options->speed.multiplier = atof(OPT_ARG(MULTIPLIER));
     }
 
-    if (HAVE_OPT(MAXSLEEP)) {
+    if (HAVE_OPT(MAXSLEEP))
+    {
         options->maxsleep.tv_sec = OPT_VALUE_MAXSLEEP / 1000;
         options->maxsleep.tv_nsec = (OPT_VALUE_MAXSLEEP % 1000) * 1000 * 1000;
     }
@@ -223,19 +234,23 @@ tcpreplay_post_args(tcpreplay_t *ctx, int argc)
      * preloading the pcap before the first run
      */
 
-    if (HAVE_OPT(PRELOAD_PCAP)) {
+    if (HAVE_OPT(PRELOAD_PCAP))
+    {
         options->preload_pcap = true;
     }
 
     /* Dual file mode */
-    if (HAVE_OPT(DUALFILE)) {
+    if (HAVE_OPT(DUALFILE))
+    {
         options->dualfile = true;
-        if (argc < 2) {
+        if (argc < 2)
+        {
             tcpreplay_seterr(ctx, "%s", "--dualfile mode requires at least two pcap files");
             ret = -1;
             goto out;
         }
-        if (argc % 2 != 0) {
+        if (argc % 2 != 0)
+        {
             tcpreplay_seterr(ctx, "%s", "--dualfile mode requires an even number of pcap files");
             ret = -1;
             goto out;
@@ -246,21 +261,24 @@ tcpreplay_post_args(tcpreplay_t *ctx, int argc)
     options->netmap_delay = OPT_VALUE_NM_DELAY;
 #endif
 
-    if (HAVE_OPT(NETMAP)) {
+    if (HAVE_OPT(NETMAP))
+    {
 #ifdef HAVE_NETMAP
         options->netmap = 1;
         ctx->sp_type = SP_TYPE_NETMAP;
 #else
-         err(-1, "--netmap feature was not compiled in. See INSTALL.");
+        err(-1, "--netmap feature was not compiled in. See INSTALL.");
 #endif
     }
 
     if (HAVE_OPT(UNIQUE_IP))
         options->unique_ip = 1;
 
-    if (HAVE_OPT(UNIQUE_IP_LOOPS)) {
+    if (HAVE_OPT(UNIQUE_IP_LOOPS))
+    {
         options->unique_loops = atof(OPT_ARG(UNIQUE_IP_LOOPS));
-        if (options->unique_loops < 1.0) {
+        if (options->unique_loops < 1.0)
+        {
             tcpreplay_seterr(ctx, "%s", "--unique-ip-loops requires loop count >= 1.0");
             ret = -1;
             goto out;
@@ -271,12 +289,15 @@ tcpreplay_post_args(tcpreplay_t *ctx, int argc)
     if (HAVE_OPT(NO_FLOW_STATS))
         options->flow_stats = 0;
 
-    if (HAVE_OPT(FLOW_EXPIRY)) {
+    if (HAVE_OPT(FLOW_EXPIRY))
+    {
         options->flow_expiry = OPT_VALUE_FLOW_EXPIRY;
     }
 
-    if (HAVE_OPT(TIMER)) {
-        if (strcmp(OPT_ARG(TIMER), "select") == 0) {
+    if (HAVE_OPT(TIMER))
+    {
+        if (strcmp(OPT_ARG(TIMER), "select") == 0)
+        {
 #ifdef HAVE_SELECT
             options->accurate = accurate_select;
 #else
@@ -284,22 +305,32 @@ tcpreplay_post_args(tcpreplay_t *ctx, int argc)
             ret = -1;
             goto out;
 #endif
-        } else if (strcmp(OPT_ARG(TIMER), "ioport") == 0) {
+        }
+        else if (strcmp(OPT_ARG(TIMER), "ioport") == 0)
+        {
 #if defined HAVE_IOPORT_SLEEP__
             options.accurate = ACCURATE_IOPORT;
             ioport_sleep_init();
 #else
             err(-1, "tcpreplay not compiled with IO Port 0x80 support");
 #endif
-        } else if (strcmp(OPT_ARG(TIMER), "gtod") == 0) {
+        }
+        else if (strcmp(OPT_ARG(TIMER), "gtod") == 0)
+        {
             options->accurate = accurate_gtod;
-        } else if (strcmp(OPT_ARG(TIMER), "nano") == 0) {
+        }
+        else if (strcmp(OPT_ARG(TIMER), "nano") == 0)
+        {
             options->accurate = accurate_nanosleep;
-        } else if (strcmp(OPT_ARG(TIMER), "abstime") == 0) {
+        }
+        else if (strcmp(OPT_ARG(TIMER), "abstime") == 0)
+        {
             tcpreplay_seterr(ctx, "%s", "abstime is deprecated");
             ret = -1;
             goto out;
-        } else {
+        }
+        else
+        {
             tcpreplay_seterr(ctx, "Unsupported timer mode: %s", OPT_ARG(TIMER));
             ret = -1;
             goto out;
@@ -307,21 +338,24 @@ tcpreplay_post_args(tcpreplay_t *ctx, int argc)
     }
 
 #ifdef HAVE_RDTSC
-    if (HAVE_OPT(RDTSC_CLICKS)) {
+    if (HAVE_OPT(RDTSC_CLICKS))
+    {
         rdtsc_calibrate(OPT_VALUE_RDTSC_CLICKS);
     }
 #endif
 
-    if (HAVE_OPT(PKTLEN)) {
+    if (HAVE_OPT(PKTLEN))
+    {
         options->use_pkthdr_len = true;
-        warn ++;
+        warn++;
         tcpreplay_setwarn(ctx, "%s", "--pktlen may cause problems.  Use with caution.");
     }
 
-    if ((intname = get_interface(ctx->intlist, OPT_ARG(INTF1))) == NULL) {
+    if ((intname = get_interface(ctx->intlist, OPT_ARG(INTF1))) == NULL)
+    {
         if (!strncmp(OPT_ARG(INTF1), "netmap:", 7) || !strncmp(OPT_ARG(INTF1), "vale", 4))
             tcpreplay_seterr(ctx, "Unable to connect to netmap interface %s. Ensure netmap module is installed (see INSTALL).",
-                    OPT_ARG(INTF1));
+                             OPT_ARG(INTF1));
         else
             tcpreplay_seterr(ctx, "Invalid interface name/alias: %s", OPT_ARG(INTF1));
 
@@ -329,7 +363,8 @@ tcpreplay_post_args(tcpreplay_t *ctx, int argc)
         goto out;
     }
 
-    if (!strncmp(intname, "netmap:", 7) || !strncmp(intname, "vale:", 5)) {
+    if (!strncmp(intname, "netmap:", 7) || !strncmp(intname, "vale:", 5))
+    {
 #ifdef HAVE_NETMAP
         options->netmap = 1;
         ctx->sp_type = SP_TYPE_NETMAP;
@@ -343,7 +378,8 @@ tcpreplay_post_args(tcpreplay_t *ctx, int argc)
     options->intf1_name = safe_strdup(intname);
 
     /* open interfaces for writing */
-    if ((ctx->intf1 = sendpacket_open(options->intf1_name, ebuf, TCPR_DIR_C2S, ctx->sp_type, ctx)) == NULL) {
+    if ((ctx->intf1 = sendpacket_open(options->intf1_name, ebuf, TCPR_DIR_C2S, ctx->sp_type, ctx)) == NULL)
+    {
         tcpreplay_seterr(ctx, "Can't open %s: %s", options->intf1_name, ebuf);
         ret = -1;
         goto out;
@@ -355,13 +391,16 @@ tcpreplay_post_args(tcpreplay_t *ctx, int argc)
 
     ctx->intf1dlt = sendpacket_get_dlt(ctx->intf1);
 
-    if (HAVE_OPT(INTF2)) {
-        if (!HAVE_OPT(CACHEFILE) && !HAVE_OPT(DUALFILE)) {
+    if (HAVE_OPT(INTF2))
+    {
+        if (!HAVE_OPT(CACHEFILE) && !HAVE_OPT(DUALFILE))
+        {
             tcpreplay_seterr(ctx, "--intf2=%s requires either --cachefile or --dualfile", OPT_ARG(INTF2));
             ret = -1;
             goto out;
         }
-        if ((intname = get_interface(ctx->intlist, OPT_ARG(INTF2))) == NULL) {
+        if ((intname = get_interface(ctx->intlist, OPT_ARG(INTF2))) == NULL)
+        {
             tcpreplay_seterr(ctx, "Invalid interface name/alias: %s", OPT_ARG(INTF2));
             ret = -1;
             goto out;
@@ -370,7 +409,8 @@ tcpreplay_post_args(tcpreplay_t *ctx, int argc)
         options->intf2_name = safe_strdup(intname);
 
         /* open interface for writing */
-        if ((ctx->intf2 = sendpacket_open(options->intf2_name, ebuf, TCPR_DIR_S2C, ctx->sp_type, ctx)) == NULL) {
+        if ((ctx->intf2 = sendpacket_open(options->intf2_name, ebuf, TCPR_DIR_S2C, ctx->sp_type, ctx)) == NULL)
+        {
             tcpreplay_seterr(ctx, "Can't open %s: %s", options->intf2_name, ebuf);
         }
 
@@ -379,19 +419,21 @@ tcpreplay_post_args(tcpreplay_t *ctx, int argc)
 #endif
 
         ctx->intf2dlt = sendpacket_get_dlt(ctx->intf2);
-        if (ctx->intf2dlt != ctx->intf1dlt) {
+        if (ctx->intf2dlt != ctx->intf1dlt)
+        {
             tcpreplay_seterr(ctx, "DLT type mismatch for %s (%s) and %s (%s)",
-                options->intf1_name, pcap_datalink_val_to_name(ctx->intf1dlt),
-                options->intf2_name, pcap_datalink_val_to_name(ctx->intf2dlt));
+                             options->intf1_name, pcap_datalink_val_to_name(ctx->intf1dlt),
+                             options->intf2_name, pcap_datalink_val_to_name(ctx->intf2dlt));
             ret = -1;
             goto out;
         }
     }
 
-    if (HAVE_OPT(CACHEFILE)) {
+    if (HAVE_OPT(CACHEFILE))
+    {
         temp = safe_strdup(OPT_ARG(CACHEFILE));
         options->cache_packets = read_cache(&options->cachedata, temp,
-            &options->comment);
+                                            &options->comment);
         safe_free(temp);
     }
 
@@ -408,8 +450,7 @@ out:
 /**
  * Closes & free's all memory related to a tcpreplay context
  */
-void
-tcpreplay_close(tcpreplay_t *ctx)
+void tcpreplay_close(tcpreplay_t *ctx)
 {
     tcpreplay_opt_t *options;
     interface_list_t *intlist, *intlistnext;
@@ -437,7 +478,8 @@ tcpreplay_close(tcpreplay_t *ctx)
 
     /* free the file cache */
     packet_cache = options->file_cache->packet_cache;
-    while (packet_cache != NULL) {
+    while (packet_cache != NULL)
+    {
         next = packet_cache->next;
         safe_free(packet_cache->pktdata);
         safe_free(packet_cache);
@@ -445,9 +487,11 @@ tcpreplay_close(tcpreplay_t *ctx)
     }
 
     /* free our interface list */
-    if (ctx->intlist != NULL) {
+    if (ctx->intlist != NULL)
+    {
         intlist = ctx->intlist;
-        while (intlist != NULL) {
+        while (intlist != NULL)
+        {
             intlistnext = intlist->next;
             safe_free(intlist);
             intlist = intlistnext;
@@ -462,8 +506,7 @@ tcpreplay_close(tcpreplay_t *ctx)
  * when using a tcpprep cache file or dualfile mode.  Note, both interfaces
  * must use the same DLT type
  */
-int
-tcpreplay_set_interface(tcpreplay_t *ctx, tcpreplay_intf intf, char *value)
+int tcpreplay_set_interface(tcpreplay_t *ctx, tcpreplay_intf intf, char *value)
 {
     static int int1dlt = -1, int2dlt = -1;
     char *intname;
@@ -475,11 +518,13 @@ tcpreplay_set_interface(tcpreplay_t *ctx, tcpreplay_intf intf, char *value)
 
     ebuf = safe_malloc(SENDPACKET_ERRBUF_SIZE);
 
-    if (intf == intf1) {
-        if ((intname = get_interface(ctx->intlist, value)) == NULL) {
+    if (intf == intf1)
+    {
+        if ((intname = get_interface(ctx->intlist, value)) == NULL)
+        {
             if (!strncmp(OPT_ARG(INTF1), "netmap:", 7) || !strncmp(OPT_ARG(INTF1), "vale", 4))
                 tcpreplay_seterr(ctx, "Unable to connect to netmap interface %s. Ensure netmap module is installed (see INSTALL).",
-                        value);
+                                 value);
             else
                 tcpreplay_seterr(ctx, "Invalid interface name/alias: %s", value);
             ret = -1;
@@ -489,15 +534,19 @@ tcpreplay_set_interface(tcpreplay_t *ctx, tcpreplay_intf intf, char *value)
         ctx->options->intf1_name = safe_strdup(intname);
 
         /* open interfaces for writing */
-        if ((ctx->intf1 = sendpacket_open(ctx->options->intf1_name, ebuf, TCPR_DIR_C2S, ctx->sp_type, ctx)) == NULL) {
+        if ((ctx->intf1 = sendpacket_open(ctx->options->intf1_name, ebuf, TCPR_DIR_C2S, ctx->sp_type, ctx)) == NULL)
+        {
             tcpreplay_seterr(ctx, "Can't open %s: %s", ctx->options->intf1_name, ebuf);
             ret = -1;
             goto out;
         }
 
         int1dlt = sendpacket_get_dlt(ctx->intf1);
-    } else if (intf == intf2) {
-        if ((intname = get_interface(ctx->intlist, value)) == NULL) {
+    }
+    else if (intf == intf2)
+    {
+        if ((intname = get_interface(ctx->intlist, value)) == NULL)
+        {
             tcpreplay_seterr(ctx, "Invalid interface name/alias: %s", ctx->options->intf2_name);
             ret = -1;
             goto out;
@@ -506,7 +555,8 @@ tcpreplay_set_interface(tcpreplay_t *ctx, tcpreplay_intf intf, char *value)
         ctx->options->intf2_name = safe_strdup(intname);
 
         /* open interface for writing */
-        if ((ctx->intf2 = sendpacket_open(ctx->options->intf2_name, ebuf, TCPR_DIR_S2C, ctx->sp_type, ctx)) == NULL) {
+        if ((ctx->intf2 = sendpacket_open(ctx->options->intf2_name, ebuf, TCPR_DIR_S2C, ctx->sp_type, ctx)) == NULL)
+        {
             tcpreplay_seterr(ctx, "Can't open %s: %s", ctx->options->intf2_name, ebuf);
             ret = -1;
             goto out;
@@ -518,11 +568,13 @@ tcpreplay_set_interface(tcpreplay_t *ctx, tcpreplay_intf intf, char *value)
      * If both interfaces are selected, then make sure both interfaces use
      * the same DLT type
      */
-    if (int1dlt != -1 && int2dlt != -1) {
-        if (int1dlt != int2dlt) {
+    if (int1dlt != -1 && int2dlt != -1)
+    {
+        if (int1dlt != int2dlt)
+        {
             tcpreplay_seterr(ctx, "DLT type mismatch for %s (%s) and %s (%s)",
-                ctx->options->intf1_name, pcap_datalink_val_to_name(int1dlt), 
-                ctx->options->intf2_name, pcap_datalink_val_to_name(int2dlt));
+                             ctx->options->intf1_name, pcap_datalink_val_to_name(int1dlt),
+                             ctx->options->intf2_name, pcap_datalink_val_to_name(int2dlt));
             ret = -1;
             goto out;
         }
@@ -536,8 +588,7 @@ out:
 /**
  * Set the replay speed mode.
  */
-int
-tcpreplay_set_speed_mode(tcpreplay_t *ctx, tcpreplay_speed_mode value)
+int tcpreplay_set_speed_mode(tcpreplay_t *ctx, tcpreplay_speed_mode value)
 {
     assert(ctx);
 
@@ -546,24 +597,21 @@ tcpreplay_set_speed_mode(tcpreplay_t *ctx, tcpreplay_speed_mode value)
 }
 
 /**
- * Set the approprate speed value.  Value is interpreted based on 
+ * Set the approprate speed value.  Value is interpreted based on
  * how tcpreplay_set_speed_mode() value
  */
-int
-tcpreplay_set_speed_speed(tcpreplay_t *ctx, COUNTER value)
+int tcpreplay_set_speed_speed(tcpreplay_t *ctx, COUNTER value)
 {
     assert(ctx);
     ctx->options->speed.speed = value;
     return 0;
 }
 
-
 /**
  * Sending under packets/sec requires an integer value, not float.
  * you must first call tcpreplay_set_speed_mode(ctx, speed_packetrate)
  */
-int
-tcpreplay_set_speed_pps_multi(tcpreplay_t *ctx, int value)
+int tcpreplay_set_speed_pps_multi(tcpreplay_t *ctx, int value)
 {
     assert(ctx);
     ctx->options->speed.pps_multi = value;
@@ -573,8 +621,7 @@ tcpreplay_set_speed_pps_multi(tcpreplay_t *ctx, int value)
 /**
  * How many times should we loop through all the pcap files?
  */
-int
-tcpreplay_set_loop(tcpreplay_t *ctx, u_int32_t value)
+int tcpreplay_set_loop(tcpreplay_t *ctx, u_int32_t value)
 {
     assert(ctx);
     ctx->options->loop = value;
@@ -584,16 +631,14 @@ tcpreplay_set_loop(tcpreplay_t *ctx, u_int32_t value)
 /**
  * Set the unique IP address flag
  */
-int
-tcpreplay_set_unique_ip(tcpreplay_t *ctx, bool value)
+int tcpreplay_set_unique_ip(tcpreplay_t *ctx, bool value)
 {
     assert(ctx);
     ctx->options->unique_ip = value;
     return 0;
 }
 
-int
-tcpreplay_set_unique_ip_loops(tcpreplay_t *ctx, int value)
+int tcpreplay_set_unique_ip_loops(tcpreplay_t *ctx, int value)
 {
     assert(ctx);
     ctx->options->unique_loops = value;
@@ -603,8 +648,7 @@ tcpreplay_set_unique_ip_loops(tcpreplay_t *ctx, int value)
 /**
  * Set netmap mode
  */
-int
-tcpreplay_set_netmap(_U_ tcpreplay_t *ctx, _U_ bool value)
+int tcpreplay_set_netmap(_U_ tcpreplay_t *ctx, _U_ bool value)
 {
     assert(ctx);
 #ifdef HAVE_NETMAP
@@ -620,8 +664,7 @@ tcpreplay_set_netmap(_U_ tcpreplay_t *ctx, _U_ bool value)
  * Tell tcpreplay to ignore the snaplen (default) and use the "actual"
  * packet len instead
  */
-int
-tcpreplay_set_use_pkthdr_len(tcpreplay_t *ctx, bool value)
+int tcpreplay_set_use_pkthdr_len(tcpreplay_t *ctx, bool value)
 {
     assert(ctx);
     ctx->options->use_pkthdr_len = value;
@@ -631,8 +674,7 @@ tcpreplay_set_use_pkthdr_len(tcpreplay_t *ctx, bool value)
 /**
  * Override the outbound MTU
  */
-int
-tcpreplay_set_mtu(tcpreplay_t *ctx, int value)
+int tcpreplay_set_mtu(tcpreplay_t *ctx, int value)
 {
     assert(ctx);
     ctx->options->mtu = value;
@@ -642,8 +684,7 @@ tcpreplay_set_mtu(tcpreplay_t *ctx, int value)
 /**
  * Sets the accurate timing mode
  */
-int
-tcpreplay_set_accurate(tcpreplay_t *ctx, tcpreplay_accurate value)
+int tcpreplay_set_accurate(tcpreplay_t *ctx, tcpreplay_accurate value)
 {
     assert(ctx);
     ctx->options->accurate = value;
@@ -653,8 +694,7 @@ tcpreplay_set_accurate(tcpreplay_t *ctx, tcpreplay_accurate value)
 /**
  * Sets the number of seconds between printing stats
  */
-int
-tcpreplay_set_stats(tcpreplay_t *ctx, int value)
+int tcpreplay_set_stats(tcpreplay_t *ctx, int value)
 {
     assert(ctx);
     ctx->options->stats = value;
@@ -668,8 +708,7 @@ tcpreplay_set_stats(tcpreplay_t *ctx, int value)
  * one file for each interface.
  */
 
-int 
-tcpreplay_set_dualfile(tcpreplay_t *ctx, bool value)
+int tcpreplay_set_dualfile(tcpreplay_t *ctx, bool value)
 {
     assert(ctx);
     ctx->options->dualfile = value;
@@ -677,14 +716,13 @@ tcpreplay_set_dualfile(tcpreplay_t *ctx, bool value)
 }
 
 /**
- * \brief Enable or disable preloading the file cache 
+ * \brief Enable or disable preloading the file cache
  *
  * Note: This is a global option and forces all pcaps
  * to be preloaded for this context.  If you turn this
  * on, then it forces set_file_cache(true)
  */
-int
-tcpreplay_set_preload_pcap(tcpreplay_t *ctx, bool value)
+int tcpreplay_set_preload_pcap(tcpreplay_t *ctx, bool value)
 {
     assert(ctx);
     ctx->options->preload_pcap = value;
@@ -697,13 +735,13 @@ tcpreplay_set_preload_pcap(tcpreplay_t *ctx, bool value)
  * One or more pcap files can be added.  Each file will be replayed
  * in order
  */
-int
-tcpreplay_add_pcapfile(tcpreplay_t *ctx, char *pcap_file)
+int tcpreplay_add_pcapfile(tcpreplay_t *ctx, char *pcap_file)
 {
     assert(ctx);
     assert(pcap_file);
 
-    if (ctx->options->source_cnt < MAX_FILES) {
+    if (ctx->options->source_cnt < MAX_FILES)
+    {
         ctx->options->sources[ctx->options->source_cnt].filename = safe_strdup(pcap_file);
         ctx->options->sources[ctx->options->source_cnt].type = source_filename;
 
@@ -717,9 +755,9 @@ tcpreplay_add_pcapfile(tcpreplay_t *ctx, char *pcap_file)
         ctx->options->file_cache[ctx->options->source_cnt].packet_cache = NULL;
 
         ctx->options->source_cnt += 1;
-
-
-    } else {
+    }
+    else
+    {
         tcpreplay_seterr(ctx, "Unable to add more then %u files", MAX_FILES);
         return -1;
     }
@@ -729,8 +767,7 @@ tcpreplay_add_pcapfile(tcpreplay_t *ctx, char *pcap_file)
 /**
  * Limit the total number of packets to send
  */
-int
-tcpreplay_set_limit_send(tcpreplay_t *ctx, COUNTER value)
+int tcpreplay_set_limit_send(tcpreplay_t *ctx, COUNTER value)
 {
     assert(ctx);
     ctx->options->limit_send = value;
@@ -743,27 +780,25 @@ tcpreplay_set_limit_send(tcpreplay_t *ctx, COUNTER value)
  * Note: this only works if you have a single pcap file
  * returns -1 on error
  */
-int
-tcpreplay_set_tcpprep_cache(tcpreplay_t *ctx, char *file)
+int tcpreplay_set_tcpprep_cache(tcpreplay_t *ctx, char *file)
 {
     assert(ctx);
     char *tcpprep_file;
 
-    if (ctx->options->source_cnt > 1) {
+    if (ctx->options->source_cnt > 1)
+    {
         tcpreplay_seterr(ctx, "%s", "Unable to use tcpprep cache file with a single pcap file");
         return -1;
     }
 
     tcpprep_file = safe_strdup(file);
-    ctx->options->cache_packets = read_cache(&ctx->options->cachedata, 
-        tcpprep_file, &ctx->options->comment);
+    ctx->options->cache_packets = read_cache(&ctx->options->cachedata,
+                                             tcpprep_file, &ctx->options->comment);
 
     free(tcpprep_file);
 
     return 0;
 }
-
-
 
 /*
  * Verbose mode requires fork() and tcpdump binary, hence won't work
@@ -773,8 +808,7 @@ tcpreplay_set_tcpprep_cache(tcpreplay_t *ctx, char *file)
 /**
  * Enable verbose mode
  */
-int
-tcpreplay_set_verbose(tcpreplay_t *ctx, bool value _U_)
+int tcpreplay_set_verbose(tcpreplay_t *ctx, bool value _U_)
 {
     assert(ctx);
 #ifdef ENABLE_VERBOSE
@@ -792,8 +826,7 @@ tcpreplay_set_verbose(tcpreplay_t *ctx, bool value _U_)
  * Specify the additional argument to be passed to tcpdump when enabling
  * verbose mode.  See TCPDUMP_ARGS in tcpdump.h for the default options
  */
-int
-tcpreplay_set_tcpdump_args(tcpreplay_t *ctx, char *value _U_)
+int tcpreplay_set_tcpdump_args(tcpreplay_t *ctx, char *value _U_)
 {
     assert(ctx);
 #ifdef ENABLE_VERBOSE
@@ -812,8 +845,7 @@ tcpreplay_set_tcpdump_args(tcpreplay_t *ctx, char *value _U_)
  * In order to support the verbose feature, tcpreplay needs to know where
  * tcpdump lives
  */
-int
-tcpreplay_set_tcpdump(tcpreplay_t *ctx, tcpdump_t *value _U_)
+int tcpreplay_set_tcpdump(tcpreplay_t *ctx, tcpdump_t *value _U_)
 {
     assert(ctx);
 #ifdef ENABLE_VERBOSE
@@ -827,22 +859,21 @@ tcpreplay_set_tcpdump(tcpreplay_t *ctx, tcpdump_t *value _U_)
 #endif
 }
 
-
 /**
  * \brief Set the callback function for handing manual iteration
  *
  * Obviously for this to work, you need to first set speed_mode = speed_oneatatime
  * returns 0 on success, < 0 on error
  */
-int
-tcpreplay_set_manual_callback(tcpreplay_t *ctx, tcpreplay_manual_callback callback)
+int tcpreplay_set_manual_callback(tcpreplay_t *ctx, tcpreplay_manual_callback callback)
 {
     assert(ctx);
     assert(callback);
 
-    if (ctx->options->speed.mode != speed_oneatatime) {
-        tcpreplay_seterr(ctx, "%s", 
-                "Unable to set manual callback because speed mode is not 'speed_oneatatime'");
+    if (ctx->options->speed.mode != speed_oneatatime)
+    {
+        tcpreplay_seterr(ctx, "%s",
+                         "Unable to set manual callback because speed mode is not 'speed_oneatatime'");
         return -1;
     }
 
@@ -906,7 +937,6 @@ tcpreplay_get_end_time(tcpreplay_t *ctx)
     return &ctx->static_stats.end_time;
 }
 
-
 /**
  * \brief Internal function to set the tcpreplay error string
  *
@@ -914,9 +944,8 @@ tcpreplay_get_end_time(tcpreplay_t *ctx)
  * using tcpedit_geterr().  You shouldn't ever actually call this, but use
  * tcpreplay_seterr() which is a macro wrapping this instead.
  */
-void
-__tcpreplay_seterr(tcpreplay_t *ctx, const char *func,
-        const int line, const char *file, const char *fmt, ...)
+void __tcpreplay_seterr(tcpreplay_t *ctx, const char *func,
+                        const int line, const char *file, const char *fmt, ...)
 {
     va_list ap;
     char errormsg[TCPREPLAY_ERRSTR_LEN - 32];
@@ -934,7 +963,7 @@ __tcpreplay_seterr(tcpreplay_t *ctx, const char *func,
 
 #ifdef DEBUG
     snprintf(ctx->errstr, sizeof(ctx->errstr), "From %s:%s() line %d:\n%s",
-        file, func, line, errormsg);
+             file, func, line, errormsg);
 #else
     snprintf(ctx->errstr, sizeof(ctx->errstr), "%s", errormsg);
 #endif
@@ -946,8 +975,7 @@ __tcpreplay_seterr(tcpreplay_t *ctx, const char *func,
  * Used to set the warning string when there is an non-fatal issue, result is retrieved
  * using tcpedit_getwarn().
  */
-void
-tcpreplay_setwarn(tcpreplay_t *ctx, const char *fmt, ...)
+void tcpreplay_setwarn(tcpreplay_t *ctx, const char *fmt, ...)
 {
     va_list ap;
     assert(ctx);
@@ -959,7 +987,6 @@ tcpreplay_setwarn(tcpreplay_t *ctx, const char *fmt, ...)
     va_end(ap);
 }
 
-
 /**
  * \brief Does all the prep work before calling tcpreplay_replay()
  *
@@ -967,8 +994,7 @@ tcpreplay_setwarn(tcpreplay_t *ctx, const char *fmt, ...)
  * cache file, loads the packet cache and anything else which might
  * cause a delay for starting to send packets with tcpreplay_replay()
  */
-int 
-tcpreplay_prepare(tcpreplay_t *ctx)
+int tcpreplay_prepare(tcpreplay_t *ctx)
 {
     char *intname, *ebuf;
     int int1dlt, int2dlt, i;
@@ -979,59 +1005,67 @@ tcpreplay_prepare(tcpreplay_t *ctx)
     ebuf = safe_malloc(SENDPACKET_ERRBUF_SIZE);
 
     /*
-     * First, process the validations, basically the same we do in 
+     * First, process the validations, basically the same we do in
      * tcpreplay_post_args() and AutoOpts
      */
-    if (ctx->options->intf1_name == NULL) {
+    if (ctx->options->intf1_name == NULL)
+    {
         tcpreplay_seterr(ctx, "%s", "You must specify at least one network interface");
         ret = -1;
         goto out;
     }
 
-    if (ctx->options->source_cnt == 0) {
+    if (ctx->options->source_cnt == 0)
+    {
         tcpreplay_seterr(ctx, "%s", "You must specify at least one source pcap");
         ret = -1;
         goto out;
     }
 
-    if (ctx->options->dualfile) {
-        if (!(ctx->options->source_cnt >= 2)) {
+    if (ctx->options->dualfile)
+    {
+        if (!(ctx->options->source_cnt >= 2))
+        {
             tcpreplay_seterr(ctx, "%s", "Dual file mode requires 2 or more pcap files");
             ret = -1;
             goto out;
         }
 
-        if (ctx->options->source_cnt % 2 != 0) {
+        if (ctx->options->source_cnt % 2 != 0)
+        {
             tcpreplay_seterr(ctx, "%s", "Dual file mode requires an even number of pcap files");
             ret = -1;
             goto out;
         }
     }
 
-    if (ctx->options->dualfile && ctx->options->cachedata != NULL) {
+    if (ctx->options->dualfile && ctx->options->cachedata != NULL)
+    {
         tcpreplay_seterr(ctx, "%s", "Can't use dual file mode and tcpprep cache file together");
         ret = -1;
         goto out;
     }
 
-    if ((ctx->options->dualfile || ctx->options->cachedata != NULL) && 
-           ctx->options->intf2_name == NULL) {
+    if ((ctx->options->dualfile || ctx->options->cachedata != NULL) &&
+        ctx->options->intf2_name == NULL)
+    {
         tcpreplay_seterr(ctx, "%s", "dual file mode and tcpprep cache files require two interfaces");
     }
 
-
 #ifndef HAVE_SELECT
-    if (ctx->options->accurate == accurate_select) {
+    if (ctx->options->accurate == accurate_select)
+    {
         tcpreplay_seterr(ctx, "%s", "tcpreplay_api not compiled with select support");
         ret = -1;
         goto out;
     }
 #endif
 
-    if ((intname = get_interface(ctx->intlist, ctx->options->intf1_name)) == NULL) {
+    if ((intname = get_interface(ctx->intlist, ctx->options->intf1_name)) == NULL)
+    {
         if (!strncmp(OPT_ARG(INTF1), "netmap:", 7) || !strncmp(OPT_ARG(INTF1), "vale", 4))
             tcpreplay_seterr(ctx, "Unable to connect to netmap interface %s. Ensure netmap module is installed (see INSTALL).",
-                    OPT_ARG(INTF1));
+                             OPT_ARG(INTF1));
         else
             tcpreplay_seterr(ctx, "Invalid interface name/alias: %s", OPT_ARG(INTF1));
 
@@ -1040,7 +1074,8 @@ tcpreplay_prepare(tcpreplay_t *ctx)
     }
 
     /* open interfaces for writing */
-    if ((ctx->intf1 = sendpacket_open(ctx->options->intf1_name, ebuf, TCPR_DIR_C2S, ctx->sp_type, ctx)) == NULL) {
+    if ((ctx->intf1 = sendpacket_open(ctx->options->intf1_name, ebuf, TCPR_DIR_C2S, ctx->sp_type, ctx)) == NULL)
+    {
         tcpreplay_seterr(ctx, "Can't open %s: %s", ctx->options->intf1_name, ebuf);
         ret = -1;
         goto out;
@@ -1048,25 +1083,29 @@ tcpreplay_prepare(tcpreplay_t *ctx)
 
     int1dlt = sendpacket_get_dlt(ctx->intf1);
 
-    if (ctx->options->intf2_name != NULL) {
-        if ((intname = get_interface(ctx->intlist, ctx->options->intf2_name)) == NULL) {
+    if (ctx->options->intf2_name != NULL)
+    {
+        if ((intname = get_interface(ctx->intlist, ctx->options->intf2_name)) == NULL)
+        {
             tcpreplay_seterr(ctx, "Invalid interface name/alias: %s", OPT_ARG(INTF2));
             ret = -1;
             goto out;
         }
 
         /* open interfaces for writing */
-        if ((ctx->intf2 = sendpacket_open(ctx->options->intf2_name, ebuf, TCPR_DIR_C2S, ctx->sp_type, ctx)) == NULL) {
+        if ((ctx->intf2 = sendpacket_open(ctx->options->intf2_name, ebuf, TCPR_DIR_C2S, ctx->sp_type, ctx)) == NULL)
+        {
             tcpreplay_seterr(ctx, "Can't open %s: %s", ctx->options->intf2_name, ebuf);
             ret = -1;
             goto out;
         }
 
         int2dlt = sendpacket_get_dlt(ctx->intf2);
-        if (int2dlt != int1dlt) {
+        if (int2dlt != int1dlt)
+        {
             tcpreplay_seterr(ctx, "DLT type mismatch for %s (%s) and %s (%s)",
-                ctx->options->intf1_name, pcap_datalink_val_to_name(int1dlt), 
-                ctx->options->intf2_name, pcap_datalink_val_to_name(int2dlt));
+                             ctx->options->intf1_name, pcap_datalink_val_to_name(int1dlt),
+                             ctx->options->intf2_name, pcap_datalink_val_to_name(int2dlt));
             ret = -1;
             goto out;
         }
@@ -1075,9 +1114,11 @@ tcpreplay_prepare(tcpreplay_t *ctx)
     /*
      * Setup up the file cache, if required
      */
-    if (ctx->options->preload_pcap) {
+    if (ctx->options->preload_pcap)
+    {
         /* Initialise each of the file cache structures */
-        for (i = 0; i < ctx->options->source_cnt; i++) {
+        for (i = 0; i < ctx->options->source_cnt; i++)
+        {
             ctx->options->file_cache[i].index = i;
             ctx->options->file_cache[i].cached = FALSE;
             ctx->options->file_cache[i].packet_cache = NULL;
@@ -1095,20 +1136,21 @@ out:
  * Designed to be called in a separate thread if you need to.  Blocks until
  * the replay is complete or you call tcpreplay_abort() in another thread.
  */
-int
-tcpreplay_replay(tcpreplay_t *ctx)
+int tcpreplay_replay(tcpreplay_t *ctx)
 {
     int rcode;
     COUNTER loop, total_loops;
 
     assert(ctx);
 
-    if (!ctx->options->source_cnt) {
+    if (!ctx->options->source_cnt)
+    {
         tcpreplay_seterr(ctx, "invalid source count: %d", ctx->options->source_cnt);
         return -1;
     }
 
-    if (ctx->options->dualfile && ctx->options->source_cnt < 2) {
+    if (ctx->options->dualfile && ctx->options->source_cnt < 2)
+    {
         tcpreplay_seterr(ctx, "invalid dualfile source count: %d", ctx->options->source_cnt);
         return -1;
     }
@@ -1124,22 +1166,27 @@ tcpreplay_replay(tcpreplay_t *ctx)
     loop = 0;
 
     /* main loop, when not looping forever (or until abort) */
-    if (ctx->options->loop > 0) {
-        while (ctx->options->loop-- && !ctx->abort) {  /* limited loop */
+    if (ctx->options->loop > 0)
+    {
+        // 入参[-l] 指定了回放数据包的次数，如果没有指定，则默认 1
+        while (ctx->options->loop-- && !ctx->abort)
+        { /* limited loop */
             ++loop;
-            if (ctx->options->stats == 0) {
+            if (ctx->options->stats == 0)
+            {
                 if (!ctx->unique_iteration || loop == ctx->unique_iteration)
-                    printf("Loop " COUNTER_SPEC " of " COUNTER_SPEC "...\n",
-                            loop, total_loops);
+                    printf("Loop " COUNTER_SPEC " of " COUNTER_SPEC "...\n", loop, total_loops);
                 else
                     printf("Loop " COUNTER_SPEC " of " COUNTER_SPEC " (" COUNTER_SPEC " unique)...\n",
-                            loop, total_loops,
-                            ctx->unique_iteration);
+                           loop, total_loops,
+                           ctx->unique_iteration);
             }
-            if ((rcode = tcpr_replay_index(ctx)) < 0)
+            if ((rcode = tcpr_replay_index(ctx)) < 0) // 在这里进行真正的数据回放
                 return rcode;
-            if (ctx->options->loop > 0) {
-                if (!ctx->abort && ctx->options->loopdelay_ms > 0) {
+            if (ctx->options->loop > 0)
+            {
+                if (!ctx->abort && ctx->options->loopdelay_ms > 0)
+                {
                     usleep(ctx->options->loopdelay_ms * 1000);
                     gettimeofday(&ctx->stats.end_time, NULL);
                 }
@@ -1148,20 +1195,26 @@ tcpreplay_replay(tcpreplay_t *ctx)
                     packet_stats(&ctx->stats);
             }
         }
-    } else {
-        while (!ctx->abort) { /* loop forever unless user aborts */
+    }
+    // 如果用户通过命令行参数 [-l] 将循环的次数设置为 0，则执行无限循环回放
+    else
+    {
+        while (!ctx->abort)
+        { /* loop forever unless user aborts */
             ++loop;
-            if (ctx->options->stats == 0) {
+            if (ctx->options->stats == 0)
+            {
                 if (!ctx->unique_iteration || loop == ctx->unique_iteration)
                     printf("Loop " COUNTER_SPEC "...\n", loop);
                 else
                     printf("Loop " COUNTER_SPEC " (" COUNTER_SPEC " unique)...\n", loop,
-                            ctx->unique_iteration);
+                           ctx->unique_iteration);
             }
             if ((rcode = tcpr_replay_index(ctx)) < 0)
                 return rcode;
 
-            if (!ctx->abort && ctx->options->loopdelay_ms > 0) {
+            if (!ctx->abort && ctx->options->loopdelay_ms > 0)
+            {
                 usleep(ctx->options->loopdelay_ms * 1000);
                 gettimeofday(&ctx->stats.end_time, NULL);
             }
@@ -1173,7 +1226,8 @@ tcpreplay_replay(tcpreplay_t *ctx)
 
     ctx->running = false;
 
-    if (ctx->options->stats >= 0) {
+    if (ctx->options->stats >= 0)
+    {
         char buf[64];
 
         if (format_date_time(&ctx->stats.end_time, buf, sizeof(buf)) > 0)
@@ -1187,11 +1241,10 @@ tcpreplay_replay(tcpreplay_t *ctx)
  * \brief Abort the tcpreplay_replay execution.
  *
  * This might take a little while since tcpreplay_replay() only checks this
- * once per packet (sleeping between packets can cause delays), however, 
+ * once per packet (sleeping between packets can cause delays), however,
  * this function returns once the signal has been sent and does not block
  */
-int
-tcpreplay_abort(tcpreplay_t *ctx)
+int tcpreplay_abort(tcpreplay_t *ctx)
 {
     assert(ctx);
     ctx->abort = true;
@@ -1211,13 +1264,12 @@ tcpreplay_abort(tcpreplay_t *ctx)
  * \brief Temporarily suspend tcpreplay_replay()
  *
  * This might take a little while since tcpreplay_replay() only checks this
- * once per packet (sleeping between packets can cause delays), however, 
- * this function returns once the signal has been sent and does not block 
+ * once per packet (sleeping between packets can cause delays), however,
+ * this function returns once the signal has been sent and does not block
  *
- * Note that suspending a running context can create odd timing 
+ * Note that suspending a running context can create odd timing
  */
-int
-tcpreplay_suspend(tcpreplay_t *ctx)
+int tcpreplay_suspend(tcpreplay_t *ctx)
 {
     assert(ctx);
     ctx->suspend = true;
@@ -1229,8 +1281,7 @@ tcpreplay_suspend(tcpreplay_t *ctx)
  *
  * Causes the worker thread to restart sending packets
  */
-int
-tcpreplay_restart(tcpreplay_t *ctx)
+int tcpreplay_restart(tcpreplay_t *ctx)
 {
     assert(ctx);
     ctx->suspend = false;
@@ -1242,8 +1293,7 @@ tcpreplay_restart(tcpreplay_t *ctx)
  *
  * Suspended == running, but not sending packets
  */
-bool
-tcpreplay_is_suspended(tcpreplay_t *ctx)
+bool tcpreplay_is_suspended(tcpreplay_t *ctx)
 {
     assert(ctx);
     return ctx->suspend;
@@ -1254,8 +1304,7 @@ tcpreplay_is_suspended(tcpreplay_t *ctx)
  *
  * Returns true even if it is suspended
  */
-bool 
-tcpreplay_is_running(tcpreplay_t *ctx)
+bool tcpreplay_is_running(tcpreplay_t *ctx)
 {
     assert(ctx);
     return ctx->running;
@@ -1281,12 +1330,10 @@ tcpreplay_get_stats(tcpreplay_t *ctx)
     return ptr;
 }
 
-
 /**
  * \brief returns the current number of sources/files to be sent
  */
-int
-tcpreplay_get_source_count(tcpreplay_t *ctx)
+int tcpreplay_get_source_count(tcpreplay_t *ctx)
 {
     assert(ctx);
     return ctx->options->source_cnt;
@@ -1295,15 +1342,13 @@ tcpreplay_get_source_count(tcpreplay_t *ctx)
 /**
  * \brief Returns the current source id being replayed
  */
-int
-tcpreplay_get_current_source(tcpreplay_t *ctx)
+int tcpreplay_get_current_source(tcpreplay_t *ctx)
 {
     assert(ctx);
     return ctx->current_source;
 }
 
 /* vim: set tabstop=8 expandtab shiftwidth=4 softtabstop=4: */
-
 
 /**
  * \brief Sets printing of flow statistics
