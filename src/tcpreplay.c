@@ -4,9 +4,9 @@
  *   Copyright (c) 2001-2010 Aaron Turner <aturner at synfin dot net>
  *   Copyright (c) 2013-2018 Fred Klassen <tcpreplay at appneta dot com> - AppNeta
  *
- *   The Tcpreplay Suite of tools is free software: you can redistribute it 
- *   and/or modify it under the terms of the GNU General Public License as 
- *   published by the Free Software Foundation, either version 3 of the 
+ *   The Tcpreplay Suite of tools is free software: you can redistribute it
+ *   and/or modify it under the terms of the GNU General Public License as
+ *   published by the Free Software Foundation, either version 3 of the
  *   License, or with the authors permission any later version.
  *
  *   The Tcpreplay Suite is distributed in the hope that it will be useful,
@@ -56,8 +56,7 @@ tcpreplay_t *ctx;
 
 static void flow_stats(const tcpreplay_t *ctx);
 
-int
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
     int i, optct = 0;
     int rcode;
@@ -75,56 +74,69 @@ main(int argc, char *argv[])
 
     fflush(NULL);
     rcode = tcpreplay_post_args(ctx, argc);
-    if (rcode <= -2) {
+    if (rcode <= -2)
+    {
         warnx("%s", tcpreplay_getwarn(ctx));
-    } else if (rcode == -1) {
+    }
+    else if (rcode == -1)
+    {
         errx(-1, "Unable to parse args: %s", tcpreplay_geterr(ctx));
     }
 
     fflush(NULL);
 #ifdef TCPREPLAY_EDIT
     /* init tcpedit context */
-    if (tcpedit_init(&tcpedit, sendpacket_get_dlt(ctx->intf1)) < 0) {
+    if (tcpedit_init(&tcpedit, sendpacket_get_dlt(ctx->intf1)) < 0)
+    {
         errx(-1, "Error initializing tcpedit: %s", tcpedit_geterr(tcpedit));
     }
 
     /* parse the tcpedit args */
     rcode = tcpedit_post_args(tcpedit);
-    if (rcode < 0) {
+    if (rcode < 0)
+    {
         tcpedit_close(&tcpedit);
         errx(-1, "Unable to parse args: %s", tcpedit_geterr(tcpedit));
-    } else if (rcode == 1) {
+    }
+    else if (rcode == 1)
+    {
         warnx("%s", tcpedit_geterr(tcpedit));
     }
 
-    if (tcpedit_validate(tcpedit) < 0) {
+    if (tcpedit_validate(tcpedit) < 0)
+    {
         tcpedit_close(&tcpedit);
         errx(-1, "Unable to edit packets given options:\n%s",
-               tcpedit_geterr(tcpedit));
+             tcpedit_geterr(tcpedit));
     }
 #endif
 
-    if (ctx->options->preload_pcap && ! HAVE_OPT(QUIET)) {
+    if (ctx->options->preload_pcap && !HAVE_OPT(QUIET))
+    {
         notice("File Cache is enabled");
     }
 
     /*
      * Setup up the file cache, if required
      */
-    if (ctx->options->preload_pcap) {
+    if (ctx->options->preload_pcap)
+    {
         /* Initialize each of the file cache structures */
-        for (i = 0; i < argc; i++) {
+        for (i = 0; i < argc; i++)
+        {
             ctx->options->file_cache[i].index = i;
             ctx->options->file_cache[i].cached = FALSE;
             ctx->options->file_cache[i].packet_cache = NULL;
         }
     }
 
-    for (i = 0; i < argc; i++) {
+    for (i = 0; i < argc; i++)
+    {
         tcpreplay_add_pcapfile(ctx, argv[i]);
 
         /* preload our pcap file? */
-        if (ctx->options->preload_pcap) {
+        if (ctx->options->preload_pcap)
+        {
             preload_pcap_file(ctx, i);
         }
     }
@@ -140,17 +152,21 @@ main(int argc, char *argv[])
     /* main loop */
     rcode = tcpreplay_replay(ctx);
 
-    if (rcode < 0) {
+    if (rcode < 0)
+    {
         notice("\nFailed: %s\n", tcpreplay_geterr(ctx));
 #ifdef TCPREPLAY_EDIT
         tcpedit_close(&tcpedit);
 #endif
         exit(rcode);
-    } else if (rcode == 1) {
+    }
+    else if (rcode == 1)
+    {
         notice("\nWarning: %s\n", tcpreplay_getwarn(ctx));
     }
 
-    if (ctx->stats.bytes_sent > 0) {
+    if (ctx->stats.bytes_sent > 0)
+    {
         char buf[1024];
 
         packet_stats(&ctx->stats);
@@ -158,7 +174,8 @@ main(int argc, char *argv[])
             flow_stats(ctx);
         sendpacket_getstat(ctx->intf1, buf, sizeof(buf));
         printf("%s", buf);
-        if (ctx->intf2 != NULL) {
+        if (ctx->intf2 != NULL)
+        {
             sendpacket_getstat(ctx->intf2, buf, sizeof(buf));
             printf("%s", buf);
         }
@@ -166,7 +183,7 @@ main(int argc, char *argv[])
 
 #ifdef TIMESTAMP_TRACE
     dump_timestamp_trace_array(&ctx->stats.start_time, &ctx->stats.end_time,
-            ctx->options->speed.speed);
+                               ctx->options->speed.speed);
 #endif
 #ifdef TCPREPLAY_EDIT
     tcpedit_close(&tcpedit);
@@ -174,7 +191,7 @@ main(int argc, char *argv[])
     tcpreplay_close(ctx);
     restore_stdin();
     return 0;
-}   /* main() */
+} /* main() */
 
 /**
  * Print various flow statistics
@@ -206,13 +223,17 @@ static void flow_stats(const tcpreplay_t *ctx)
      * to the next then multiply by the number of
      * successful iterations.
      */
-    if (options->preload_pcap) {
-        if (ctx->options->unique_ip) {
+    if (options->preload_pcap)
+    {
+        if (ctx->options->unique_ip)
+        {
             flows_total *= ctx->last_unique_iteration;
             flows_unique *= ctx->last_unique_iteration;
             flows_expired *= ctx->last_unique_iteration;
 #ifdef TCPREPLAY_EDIT
-        } else if (tcpedit->seed) {
+        }
+        else if (tcpedit->seed)
+        {
             flows_total *= ctx->iteration;
             flows_unique *= ctx->iteration;
             flows_expired *= ctx->iteration;
@@ -220,10 +241,11 @@ static void flow_stats(const tcpreplay_t *ctx)
         }
     }
 
-    flow_packets  = stats->flow_packets * ctx->iteration;
+    flow_packets = stats->flow_packets * ctx->iteration;
     flow_non_flow_packets = stats->flow_non_flow_packets * ctx->iteration;
 
-    if (diff_us) {
+    if (diff_us)
+    {
         COUNTER flows_sec_X100;
 
         flows_sec_X100 = (flows_total * 100 * 1000 * 1000) / diff_us;
@@ -232,13 +254,13 @@ static void flow_stats(const tcpreplay_t *ctx)
     }
 
     if (ctx->options->flow_expiry)
-        printf("Flows: " COUNTER_SPEC " flows, " COUNTER_SPEC " unique, "COUNTER_SPEC " expired, %llu.%02u fps, " COUNTER_SPEC " flow packets, " COUNTER_SPEC " non-flow\n",
-                flows_total, flows_unique, flows_expired, flows_sec, flows_sec_100ths, flow_packets,
-                flow_non_flow_packets);
+        printf("Flows: " COUNTER_SPEC " flows, " COUNTER_SPEC " unique, " COUNTER_SPEC " expired, %llu.%02u fps, " COUNTER_SPEC " flow packets, " COUNTER_SPEC " non-flow\n",
+               flows_total, flows_unique, flows_expired, flows_sec, flows_sec_100ths, flow_packets,
+               flow_non_flow_packets);
     else
         printf("Flows: " COUNTER_SPEC " flows, %llu.%02u fps, " COUNTER_SPEC " flow packets, " COUNTER_SPEC " non-flow\n",
-                flows_total, flows_sec, flows_sec_100ths, flow_packets,
-                flow_non_flow_packets);
+               flows_total, flows_sec, flows_sec_100ths, flow_packets,
+               flow_non_flow_packets);
 }
 
 /* vim: set tabstop=8 expandtab shiftwidth=4 softtabstop=4: */
