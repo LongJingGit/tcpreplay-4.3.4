@@ -1130,8 +1130,11 @@ static void calc_sleep_time(tcpreplay_t *ctx, struct timeval *pkt_ts_delta,
          * time_delta: 自第一个回放数据包至当前回放数据包的 实际时间差
          * nap_for: 回放下一个数据包之前需要睡眠的时间
          *
-         * 假如 pkt_ts_delta 为 10ms，time_delta 为 20ms，说明回放数据包的速度小于数据包原来发送的速度，不需要 sleep（还 sleep 个锤子，赶紧发包吧！！！）；
-         * 假如 pkt_ts_delta 为 20ms，time_delta 为 10ms，说明回放数据包的速度大于数据包原来发送的速度，可以 sleep 一会再发包
+         * 假如 pkt_ts_delta 为 10ms，time_delta 为 30ms，说明回放数据包的速度小于数据包原来发送的速度，不需要 sleep
+         * 假如 pkt_ts_delta 为 30ms，time_delta 为 10ms，说明回放数据包的速度大于数据包原来发送的速度，可以 sleep 一会再发包; 如果 multiplier 为 2，则可以 sleep 10ms
+         *  判断方案：time_delta * 2 和 pkt_ts_delta 比较大小
+         *    1. 如果大于等于：则当前速率还没有达到原来发送速率的两倍，不需要 sleep
+         *    2. 如果小于：则可以 sleep 的时间为 pkt_ts_delta - time_delta * 2
          */
         if (timercmp(pkt_ts_delta, time_delta, >))
         {
@@ -1151,21 +1154,35 @@ static void calc_sleep_time(tcpreplay_t *ctx, struct timeval *pkt_ts_delta,
              * 这里提出一种通过判断 (pkt_ts_delta / multiplier) 和 time_delta 之间的大小关系来计算 sleep 时间的算法：
              * 1. 如果 (pkt_ts_delta / multiplier) 大于 time_delta，则 sleep 时间为 (pkt_ts_delta / multiplier) - time_delta
              * 2. 如果 (pkt_ts_delta / multiplier) 小于 time_delta，则清除 ctx->nap，直接 break，不用 sleep
-             * 参考代码如下：
              */
-            // double interval = ((double)pkt_ts_delta->tv_sec * 1000000000 + pkt_ts_delta->tv_nsec) / (double)options->speed.multiplier - ((double)time_delta->tv_sec * 1000000000 + time_delta->tv_nsec);
-            // if (interval > 0.00001)
-            // {
-            //     NANOSEC_TO_TIMESPEC(interval, &ctx->nap);
-            // }
-            // else
-            // {
-            //     timesclear(&ctx->nap);
-            // }
+            // 参考代码如下：
+            double interval = ((double)pkt_ts_delta->tv_sec * 1000000000 + pkt_ts_delta->tv_usec * 1000) / (double)options->speed.multiplier - ((double)time_delta->tv_sec * 1000000000 + time_delta->tv_usec * 1000);  // 计算应该睡眠的时间. 单位 ns
+            if (interval > 0.00001)
+            {
+                // 将 double 转换为 unsigned long long，可能有精度损失
+                NANOSEC_TO_TIMESPEC((COUNTER)interval, &ctx->nap);
+            }
+            else
+            {
+                timesclear(&ctx->nap);
+            }
 
-            timesdiv_float(&ctx->nap, options->speed.multiplier);
+            // timesdiv_float(&ctx->nap, options->speed.multiplier);
             dbgx(3, "original packet delta/div: " TIMESPEC_FORMAT, ctx->nap.tv_sec, ctx->nap.tv_nsec);
         }
+
+        // {
+        //     if (timercmp(pkt_ts_delta, time_delta, >))
+        //     {
+        //         COUNTER multi_time_delta_us = (time_delta->tv_sec * 1000000000 + time_delta->tv_usec * 1000) * options->speed.multiplier;
+        //         COUNTER pkt_ts_delta_us = pkt_ts_delta->tv_sec * 1000000000 + pkt_ts_delta->tv_usec * 1000;
+        //         if (multi_time_delta_us < pkt_ts_delta_us)
+        //         {
+        //             COUNTER sleep_time = pkt_ts_delta_us - multi_time_delta_us;
+        //             NANOSEC_TO_TIMESPEC(sleep_time, &ctx->nap);
+        //         }
+        //     }
+        // }
         break;
 
     case speed_mbpsrate:
