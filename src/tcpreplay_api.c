@@ -378,6 +378,7 @@ int tcpreplay_post_args(tcpreplay_t *ctx, int argc)
     options->intf1_name = safe_strdup(intname);
 
     /* open interfaces for writing */
+    // 创建 PF_PACKET socket，可以直接从 MAC 层收发数据
     if ((ctx->intf1 = sendpacket_open(options->intf1_name, ebuf, TCPR_DIR_C2S, ctx->sp_type, ctx)) == NULL)
     {
         tcpreplay_seterr(ctx, "Can't open %s: %s", options->intf1_name, ebuf);
